@@ -1,0 +1,185 @@
+
+Static Function PRDZ_ETQ(cOrdApt,oGet1, oGet3, oGet5, oGet7, oDlg)
+
+Local aArea := GetArea()
+//Local aAreaZ02 := Z02->(GetArea())
+
+Local _cOP := ''
+Local cCod := ''
+
+Local aVetInc := {}
+Local dData := dDataBase
+Local nOpc := 3
+Local _cItem :=''
+Local _cC2seq := ''
+Local _cAPNTD := ''
+
+Private lMsErroAuto     := .F.
+
+	If Len(Alltrim(_cNumSer)) == 18
+		//Alert ("Deu certo")
+		cOrdApt:= _cNumSer
+		//Alert (_cNumSer)
+		
+		DbSelectArea("Z02")
+		Z02->(DbSetOrder(2))
+		//Z02->(DbGoTop())
+		Z02->(dbSeek(xFilial("SC2") + cOrdApt))
+		_cOP := Z02->Z02_OP
+		//Alert(_cOP)
+		_cItem := Z02->Z02_ITEM
+		//Alert (_cItem)
+		_cC2seq := Z02->Z02_C2SEQ
+		//Alert (_cC2seq)
+		_cAPNTD := Z02->Z02_APNTD
+		//Alert (_cAPNTD)
+
+		If _cAPNTD != "SIM"
+			DbSelectArea("SC2")
+			SC2->(DbSetOrder(1))
+			SC2->(DbGoTop())
+			If SC2->(DbSeek(xFilial("SC2") + _cOP ))
+				cCod := SC2 -> C2_PRODUTO
+				//Alert (cCod)
+			EndIf
+		
+			DbSelectArea("SB1")
+			SB1->(DbSetOrder(1))
+			SB1->(DbGoTop())
+			If SB1->(DbSeek(xFilial("SB1") + cCod ))
+				_cDesc := SB1 -> B1_DESC
+				//Alert (_cDesc)
+			EndIf
+			
+			//Prepara o array para o execauto
+			aVetInc := {}
+			aAdd(aVetInc, {"D3_FILIAL",  FWxFilial("SC2"),  Nil})
+			aAdd(aVetInc, {"D3_TM", "001", Nil})
+			aAdd(aVetInc, {"D3_COD", cCod, Nil})
+			aAdd(aVetInc, {"D3_UM", "UN", Nil})
+			aAdd(aVetInc, {"D3_QUANT", 1, Nil})
+			aAdd(aVetInc, {"D3_OP", _cOP+_cItem+_cC2seq, Nil})
+			aAdd(aVetInc, {"D3_PARCTOT" , "P"                  , NIL})
+			aAdd(aVetInc, {"D3_LOCAL", "01", Nil})
+			aAdd(aVetInc, {"D3_EMISSAO", dData, Nil})
+			
+			//Inicia o controle de transação
+			Begin Transaction
+			//Chama a rotina automática
+			dbselectarea ("SD3")
+			lMsErroAuto := .F.
+			MsgRun("Encerramento da OP do ultimo Palete. Aguarde...","MATA250 - Encerramento de OP",{|| MSExecAuto({|x,y| MATA250(x,y)},aVetInc, 3) })
+			//MsExecAuto({|x|MATA250(x)}, aVetInc, 3)
+     
+			//Se houve erro, mostra o erro ao usuário e desarma a transação
+			If lMsErroAuto
+				MostraErro()
+				DisarmTransaction()
+			EndIf
+			//Finaliza a transação
+			End Transaction	
+			
+			RecLock("Z02",.F.) 
+				Z02->Z02_APNTD := "SIM"
+            MsUnlock()
+		Else
+			Alert ("Sequencia de etiqueta já apontada")
+		EndIf
+	
+		_cNumSer:= SPACE(18)
+		//RestArea(aAreaZ02)
+	
+	EndIf
+	If Len(Alltrim(_cNumSer2)) == 18
+		//Alert ("Deu certo")
+		cOrdApt:= _cNumSer2
+		//Alert (_cNumSer2)
+		
+		DbSelectArea("Z02")
+		Z02->(DbSetOrder(2))
+		//Z02->(DbGoTop())
+		Z02->(dbSeek(xFilial("SC2") + cOrdApt))
+		_cOP := Z02->Z02_OP
+		//Alert(_cOP)
+		_cItem := Z02->Z02_ITEM
+		//Alert (_cItem)
+		_cC2seq := Z02->Z02_C2SEQ
+		//Alert (_cC2seq)
+		_cAPNTD := Z02->Z02_APNTD
+		//Alert (_cAPNTD)
+
+		If _cAPNTD != "SIM"
+			DbSelectArea("SC2")
+			SC2->(DbSetOrder(1))
+			SC2->(DbGoTop())
+			If SC2->(DbSeek(xFilial("SC2") + _cOP ))
+				cCod := SC2 -> C2_PRODUTO
+				//Alert (cCod)
+			EndIf
+		
+			DbSelectArea("SB1")
+			SB1->(DbSetOrder(1))
+			SB1->(DbGoTop())
+			If SB1->(DbSeek(xFilial("SB1") + cCod ))
+				_cDesc2 := SB1 -> B1_DESC
+				//Alert (_cDesc)
+			EndIf
+			
+			//Prepara o array para o execauto
+			aVetInc := {}
+			aAdd(aVetInc, {"D3_FILIAL",  FWxFilial("SC2"),  Nil})
+			aAdd(aVetInc, {"D3_TM", "001", Nil})
+			aAdd(aVetInc, {"D3_COD", cCod, Nil})
+			aAdd(aVetInc, {"D3_UM", "UN", Nil})
+			aAdd(aVetInc, {"D3_QUANT", 1, Nil})
+			aAdd(aVetInc, {"D3_OP", _cOP+_cItem+_cC2seq, Nil})
+			aAdd(aVetInc, {"D3_PARCTOT" , "P"                  , NIL})
+			aAdd(aVetInc, {"D3_LOCAL", "01", Nil})
+			aAdd(aVetInc, {"D3_EMISSAO", dData, Nil})
+			
+			//Inicia o controle de transação
+			Begin Transaction
+			//Chama a rotina automática
+			dbselectarea ("SD3")
+			lMsErroAuto := .F.
+			MsgRun("Encerramento da OP do ultimo Palete. Aguarde...","MATA250 - Encerramento de OP",{|| MSExecAuto({|x,y| MATA250(x,y)},aVetInc, 3) })
+			//MsExecAuto({|x|MATA250(x)}, aVetInc, 3)
+     
+			//Se houve erro, mostra o erro ao usuário e desarma a transação
+			If lMsErroAuto
+				MostraErro()
+				DisarmTransaction()
+			EndIf
+			//Finaliza a transação
+			End Transaction	
+			
+			RecLock("Z02",.F.) 
+				Z02->Z02_APNTD := "SIM"
+            MsUnlock()
+		Else
+			Alert ("Sequencia de etiqueta já apontada")
+		EndIf
+
+		_cNumSer2:= SPACE(18)
+		//RestArea(aAreaZ02)
+	
+	EndIf
+		/*If Len(Alltrim(_cNumSer3)) == 18
+		Alert ("Deu certo")
+		cOrdApt:= _cNumSer3
+		Alert (cOrdApt)
+		//_cNumSer3:= SPACE(18)
+	EndIf
+	If Len(Alltrim(_cNumSer4)) == 18
+		Alert ("Deu certo")
+		cOrdApt:= _cNumSer4
+		Alert (cOrdApt)
+		//_cNumSer4:= SPACE(18)
+	EndIf
+*/
+	//oDlg:Refresh()
+	//oGet1:Refresh()
+
+RestArea (aArea)
+
+Return (.T., oGet3, oGet5, oGet7, oDlg)
