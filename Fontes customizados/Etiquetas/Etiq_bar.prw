@@ -259,7 +259,7 @@ Static Function RptDetalhe(cMark)
 			Loop
 		EndIf
 
-		nLin := 08
+		nLin := 00
 		cSerial := TRB->TR_SERIAL
 
 		oPrint:StartPage()
@@ -268,7 +268,8 @@ Static Function RptDetalhe(cMark)
 
 		// Se o item Fogão a lenha, põe a logo da Geral
 		If Left(cCod, 4) == "1004"
-			oPrint:SayBitmap(05,090, cImgGeral, 100, 30)
+			nLin := 08
+			oPrint:SayBitmap(05,100, cImgGeral, 100, 30)
 			nLin += 34
 			lHasLogo := .T.
 		EndIf
@@ -276,17 +277,24 @@ Static Function RptDetalhe(cMark)
 		// Quando houver logo do cliente não imprime os dados da Braslar
 		If !lImpImg
 			// Testando foi detectado que para fonte oFont03 cabem 56 caracteres
-			oPrint:Say( nLin, 00, PadC("BRASLAR DO BRASIL LTDA",112) , oFont03)
+			// oPrint:Say( nLin, 00, PadC("BRASLAR DO BRASIL LTDA",112) , oFont03)
+			oPrint:SayAlign( nLin, 00, "BRASLAR DO BRASIL LTDA", oFont03,300, 008, CLR_BLACK, 2, 1 )
 			nLin += 8
-			oPrint:Say(nLin, 00, "AVENIDA CONTINENTAL, nº S/N - DISTRITO INDUSTRIAL - PONTA GROSSA - PR", oFont03)
+			// oPrint:Say(nLin, 00, "AVENIDA CONTINENTAL, nº S/N - DISTRITO INDUSTRIAL - PONTA GROSSA - PR", oFont03)
+			oPrint:SayAlign( nLin, 00, "AVENIDA CONTINENTAL, nº S/N - DISTRITO INDUSTRIAL - PONTA GROSSA - PR", oFont03,300, 008, CLR_BLACK, 2, 1 )
 			nLin += 8
-			oPrint:Say(nLin, 00, PadC("CNPJ:04.016.420/0001-17 - Insc. 90219779666", 112), oFont03)
+			// oPrint:Say(nLin, 00, PadC("CNPJ:04.016.420/0001-17 - Insc. 90219779666", 112), oFont03)
+			oPrint:SayAlign( nLin, 00, "CNPJ:04.016.420/0001-17 - Insc. 90219779666", oFont03,300, 008, CLR_BLACK, 2, 1 )
 			nLin += 8
-			oPrint:Say(nLin, 00, PadC("TELEFONE:42 32205650 Web Site: www.fogoesbraslar.com.br", 112), oFont03)
-			nLin += 8
+			// oPrint:Say(nLin, 00, PadC("TELEFONE:42 32205650 Web Site: www.fogoesbraslar.com.br", 112), oFont03)
+			oPrint:SayAlign( nLin, 00, "TELEFONE:42 32205650 Web Site: www.fogoesbraslar.com.br", oFont03,300, 008, CLR_BLACK, 2, 1 )
+			nLin += 10
 			oPrint:Say(nLin, 00, Replicate("_", 073), oFont03)
+			// oPrint:Say( 34, 00, Replicate("_", 073), oFont03)
+
 		Else
-			oPrint:SayBitmap(05,050, fFoto(), 181, 56)
+			nLin := 08
+			oPrint:SayBitmap(05,060, fFoto(), 181, 56)
 			nLin += 42
 			// lHasLogo := .T.
 		EndIf
@@ -295,24 +303,28 @@ Static Function RptDetalhe(cMark)
 
 		// Dados do Produto
 		// Testando foi detectado que para fonte oFont01N cabem 39 caracteres
-		nLin += 14
-		oPrint:Say(nLin, 00, PadC(cCod, 80), oFont01N)
+		nLin += 04
+		// oPrint:Say(nLin, 00, PadC(cCod, 80), oFont01N)
+		oPrint:SayAlign(nLin, 00, AllTrim(cCod), oFont01N,300, 012, CLR_BLACK, 2, 1 )
 		nLin += 10
-		oPrint:Say(nLin, 00, PadC(AllTrim(MemoLine(cDescProd,39,1)), 39), oFont01N)
+		// oPrint:Say(nLin, 00, PadC(AllTrim(MemoLine(cDescProd,39,1)), 39), oFont01N)
+		oPrint:SayAlign(nLin, 00, AllTrim(MemoLine(cDescProd,39,1)), oFont01N,300, 012, CLR_BLACK, 2, 1 )
 
 		If !Empty(MemoLine(cDescProd,39,2))
 			nLin += 10
-			oPrint:Say(nLin, 00, PadC(AllTrim(MemoLine(cDescProd,39,2)), 39), oFont01N)
+			// oPrint:Say(nLin, 00, PadC(AllTrim(MemoLine(cDescProd,39,2)), 39), oFont01N)
+			oPrint:SayAlign(nLin, 00, AllTrim(MemoLine(cDescProd,39,2)), oFont01N,300, 012, CLR_BLACK, 2, 1 )
 		EndIf
 
 		// Só imprime essa parte quando não estiver logo no cabeçalho
 		If !lHasLogo
 			// Complemento do produto
-			nLin += 6
+			nLin += 16
 			oPrint:Say(nLin, 00, Replicate("_", 073), oFont03)
+			nLin += 02
+			// oPrint:Say(nLin, 00, cDescCient, oFont03N)
+			oPrint:SayAlign(nLin, 00, cDescCient, oFont03N,300, 008, CLR_BLACK, 2, 1 )
 			nLin += 10
-			oPrint:Say(nLin, 00, cDescCient, oFont03N)
-			nLin += 2
 			oPrint:Say(nLin, 00, Replicate("_", 073), oFont03)
 
 			// Informações adicionais do produto
@@ -320,24 +332,26 @@ Static Function RptDetalhe(cMark)
 			oPrint:Say(nLin, 0, cInfEt1, oFont03)
 			oPrint:Say(nLin, 150, cInfEt2, oFont03)
 
-			nLin += 8
+			nLin += 08
 			oPrint:Say(nLin, 0, cInfEt3, oFont03)
 			oPrint:Say(nLin, 150, cInfEt4, oFont03)
 
-			nLin += 8
+			nLin += 08
 			oPrint:Say(nLin, 0, cInfEt5, oFont03)
 			oPrint:Say(nLin, 150, cInfEt6, oFont03)
+		Else
+			nLin += 10
 		EndIf
 
 		// Data e Serial
-		nLin += 6
+		nLin += 06
 		oPrint:Say(nLin, 00, Replicate("_", 075), oFont03)
 
 		nLin += 14
 		oPrint:Say(nLin, 0, dToC(dDataBase), oFont01)
 		oPrint:Say(nLin, 150, cSerial, oFont01)
 
-		nLin += 6
+		nLin += 06
 		oPrint:Say(nLin, 00, Replicate("_", 075), oFont03)
 
 		nLin += 14
