@@ -187,7 +187,7 @@ BeginSql alias cAliasA
 	AND E1_BAIXA = ''
 	%Exp:cWhere%
 	AND %Table:SE1%.%NotDel%
-    ORDER BY E1_NUM
+    ORDER BY A1_COD,A1_LOJA
 EndSQl
 
 While (cAliasA)->(!Eof())
@@ -455,7 +455,6 @@ Static Function NumBor()
 Local cRet   := ""
 Local cAlias := GetNextAlias()
 Local aArea  := GetArea()
-//Local cBanco := ''
 
 IF lBorDia
 	BeginSql alias cAlias
