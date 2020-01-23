@@ -20,7 +20,7 @@ Private oSay1
 Private oDlg
 Private oGet1
 Private oGet2
-Private cNumSer := Space(18)
+Private cNumSer := Space(19)
 Private _cDesc  := ""
 Private nList   := 1
 Private oList
@@ -35,7 +35,7 @@ Private nQtT    := 0
 Private nQtL    := 0
 Private nQtAp   := 0
 
-// Executa funcao de montagem da estruura
+// Executa funcao de montagem da estrutura
 //Aadd(aStruct, {"OK","C", 02 ,00, "Ok" })
 //Aadd(aFields, {"OK",   ,"Ok","@!" })
 //Define as cores dos itens de legenda.
@@ -57,7 +57,7 @@ While !Eof() .And. SX3->X3_ARQUIVO == "Z02"
 End
 */
 Define MSDialog oDlg Title "APONTAMENTO DE PRODUÇÃO" From 000, 000  To 500, 1000 COLORS 0, 16777215 PIXEL
-   Aadd( aButtons, {"HISTORIC", {|| Vld_Aprov()}, "Apontamento Prod...", "Apontamento" , {|| .T.}} )  
+   Aadd( aButtons, {"HISTORIC", {|| Vld_Aprov(), AtuTmp(cNumSer)}, "Apontamento Prod...", "Apontamento" , {|| .T.}} )  
 //    @ 000, 000 SAY oSay1 SIZE 250, 250 OF oDlg COLORS 0, 16777215 PIXEL
    @ 038, 020 SAY "Codigo" OF oDlg     SIZE 076, 010 COLORS 0, 16777215 PIXEL
    @ 045, 020 MSGET oGet1  VAR cNumSer SIZE 150, 012 OF oDlg COLORS 0, 16777215 PIXEL Valid LEtiq(cNumSer)
@@ -77,7 +77,7 @@ Return(Nil)
 Static Function LEtiq(cNumSer)
 DbSelectArea("Z02")
 Z02->(DbSetOrder(2))
-If !dbSeek(xFilial("Z02") + cNumSer) .And. !Empty(cNumSer)
+If !dbSeek(xFilial("Z02") + Alltrim(cNumSer)) .And. !Empty(cNumSer)
    MsgAlert("Etiqueta não Encontrada!...")
    oGet1:Refresh() 
    oGet1:SetFocus()
@@ -114,6 +114,11 @@ MsUnlock()
 cCod   := Posicione("SC2",1,xFILIAL("SC2")+Z02->Z02_OP,"C2_PRODUTO")	
 _cDesc := cNumSer + " - " + Posicione("SB1",1,xFILIAL("SB1")+cCod,"B1_DESC")
 AtuTmp(cNumSer)
+
+If nQtT = nQtL + nQtAp//Caso tenha lido todas as etiquetas fazer apontamento
+   ApProd(.T.)
+   AtuTmp(cNumSer)
+Endif   
 oGet1:Refresh() 
 oGet1:SetFocus()
 
@@ -144,7 +149,7 @@ IndRegua("TAP", cTemp, "Z02_OP+Z02_SEQUEN",,,)
 
 DbSelectArea("Z02")
 Z02->(DbSetOrder(2))	
-If !DbSeek(xFilial("Z02") + cNumSer) .And. !Empty(cNumSer)
+If !DbSeek(xFilial("Z02") + Alltrim(cNumSer)) .And. !Empty(cNumSer)
    MsgAlert("Etiqueta não Encontrada!...")
    Return  
   Elseif Empty(cNumSer)  
@@ -173,7 +178,7 @@ While Z02->(!Eof()) .And. Z02->Z02_OP == Alltrim(_cOP)
    nQtT++
 End
 
-@cNumSer:= Space(18)
+@cNumSer:= Space(19)
 oGet1:Refresh() 
 
 DBSelectArea("TAP")
@@ -200,7 +205,7 @@ Define MSDialog oDlg1 Title "Apontar a Produção" From 000, 000  To 185, 500 COLO
    @ 010, 020 Say "Senha para Validar o Apontamento da Ord. de Prod. Nr.: " + Z02->Z02_OP Of oDlg1 SIZE 250, 010 COLORS 0, 16777215 PIXEL
    @ 020, 020 Say "Digite a Senha: "  Of oDlg1 SIZE 150, 010 COLORS 0, 16777215 PIXEL
    @ 030, 020 MsGet cSAprov  PASSWORD SIZE 70, 012   Of oDlg1 COLORS 0, 16777215 PIXEL 
-   oBt1 := TButton():New( 75, 205, "Ok",oDlg1,{||ApProd(),oDlg1:End()},30,12,,,.F.,.T.,.F.,,.F.,,,.F. )  
+   oBt1 := TButton():New( 75, 205, "Ok",oDlg1,{||ApProd(.F.,cSAprov),oDlg1:End()},30,12,,,.F.,.T.,.F.,,.F.,,,.F. )  
 Activate MSDialog oDlg1 Centered
 Return
 
@@ -210,15 +215,18 @@ Return
 | lidas até o momento                                             |
 +-----------------------------------------------------------------+
 */
-Static Function ApProd()
+Static Function ApProd(lColet,cSAprov)
 Local _cOP    := ""
 Local _cItem  := ""
 Local _cC2seq := ""
-Local cQtL    := 0
 Local cCod    := ""
 Local aVetInc := {}
 Local lMsErroAuto := .F.
-If Alltrim(cSAprov) != Alltrim(cAprov)
+Default lColet  := .F.
+Default cSAprov := ""
+Default cAprov  := ""
+
+If Alltrim(cSAprov) != Alltrim(cAprov) .And. !lColet
    MsgAlert("Senha não Confere!...")
    Return 
 Endif
@@ -252,7 +260,7 @@ aAdd(aVetInc, {"D3_COD"     , cCod  , Nil})
 aAdd(aVetInc, {"D3_UM"      , "UN"  , Nil})
 aAdd(aVetInc, {"D3_QUANT"   , nQtL  , Nil})
 aAdd(aVetInc, {"D3_OP"      , _cOP + _cItem + _cC2Seq, Nil})
-aAdd(aVetInc, {"D3_PARCTOT" ,Iif(SC2->C2_QUANT >= cQtL + SC2->C2_QUJE,"T","P"), NIL})
+aAdd(aVetInc, {"D3_PARCTOT" ,Iif(SC2->C2_QUANT > nQtL + SC2->C2_QUJE,"P","T"), NIL})
 aAdd(aVetInc, {"D3_LOCAL"   , "01" , Nil})
 aAdd(aVetInc, {"D3_EMISSAO" , dDataBase, Nil})
 Begin Transaction
