@@ -69,6 +69,7 @@ Local nValIPI	:= 0
 Local nValFre   := 0
 Local nValDes   := 0
 Local nValIcm	:= 0
+Local nValST    := 0
 Local nValISS	:= 0
 Local nDesAces	:= 0
 
@@ -121,7 +122,8 @@ Local cPicD2Ser := PesqPict("SD2","D2_SERIE")
 Local cPicD2Qtd := PesqPict("SD2","D2_QUANT")	
 Local cPicD2Tot := PesqPict("SD2","D2_TOTAL")	
 Local cPicD2VIp := PesqPict("SD2","D2_VALIPI")	
-Local cPicD2VIc := PesqPict("SD2","D2_VALICM")	
+Local cPicD2VIc := PesqPict("SD2","D2_VALICM")
+Local cPicD2VST	:= PesqPict("SD2","D2_ICMSRET")
 Local cPicD2VIs := PesqPict("SD2","D2_VALISS")
 Local cPicD2Pvn := PesqPict("SD2","D2_PRCVEN")	
 Local cPicD2Loc := PesqPict("SD2","D2_LOCAL")	
@@ -130,14 +132,15 @@ Local cPicD2TES := PesqPict("SD2","D2_TES")
 Local cPicD2Ped := PesqPict("SD2","D2_PEDIDO") 
 Local cPicD2IPv := PesqPict("SD2","D2_ITEMPV")
 Local cPicD2VFr := PesqPict("SD2","D2_VALFRE")
-Local cPicD2VDe := PesqPict("SD2","D2_DESPESAS")
+Local cPicD2VDe := PesqPict("SD2","D2_DESPESA")
 
 
 Local cTamD2Doc := TamSX3("D2_DOC")[1]	        
 Local cTamD2Qtd := TamSX3("D2_QUANT")[1]	        
 Local cTamD2Tot := TamSX3("D2_TOTAL")[1]	        
 Local cTamD2VIp := TamSX3("D2_VALIPI")[1]	    
-Local cTamD2VIc := TamSX3("D2_VALICM")[1]	    
+Local cTamD2VIc := TamSX3("D2_VALICM")[1]
+Local cTamD2VST := TamSX3("D2_ICMSRET")[1]	    
 Local cTamD2VIs := TamSX3("D2_VALISS")[1]
 Local cTamD2Cod := TamSX3("D2_COD")[1]
 Local cTamB1Dsc := TamSX3("B1_DESC")[1]
@@ -148,7 +151,7 @@ Local cTamD2TES := TamSX3("D2_TES")[1]
 Local cTamD2Ped := TamSX3("D2_PEDIDO")[1]
 Local cTamD2IPV := TamSX3("D2_ITEMPV")[1]
 Local cTamD2VFr := TamSX3("D2_VALFRE")[1]
-Local cTamD2VDe := TamSX3("D2_DESPESAS")[1]
+Local cTamD2VDe := TamSX3("D2_DESPESA")[1]
 
 Local cTitF2Cli := RetTitle("F2_CLIENTE")	
 Local cTitF2Loj := RetTitle("F2_LOJA")		
@@ -258,6 +261,7 @@ Pergunte(oReport:uParam,.F.)
 	TRCell():New(oItens,"NVALDES"		,/*Tabela*/,"Vl Desp",cPicD2VDe                	,cTamD2VDe	,/*lPixel*/,{|| nValDes			},,,"RIGHT")
 	
 	TRCell():New(oItens,"NVALICM"		,/*Tabela*/,STR0046,cPicD2VIc                	,cTamD2VIc	,/*lPixel*/,{|| nValIcm			},,,"RIGHT")
+	TRCell():New(oItens,"NVALST"		,/*Tabela*/,"Vl ICMS-ST",cPicD2VST             	,cTamD2VST	,/*lPixel*/,{|| nValST			},,,"RIGHT")
 	TRCell():New(oItens,"NVALISS"		,/*Tabela*/,STR0047,cPicD2VIs                	,cTamD2VIs	,/*lPixel*/,{|| nVlrISS			},,,"RIGHT")
 	TRCell():New(oItens,"NDESACES"		,/*Tabela*/,STR0032,cPicD2Tot               	,cTamD2Tot	,/*lPixel*/,{|| nAcN3			},,,"RIGHT")
 	TRCell():New(oItens,"NACN6"			,/*Tabela*/,STR0033,cPicD2Tot               	,cTamD2Tot	,/*lPixel*/,{|| nAcN6			},,,"RIGHT")
@@ -415,6 +419,7 @@ Local nValIPI	:= 0
 Local nValFre   := 0
 Local nValDes   := 0  
 Local nValICM	:= 0
+Local nValST    := 0
 Local nValISS	:= 0
 Local nVlrISS	:= 0
 Local cTipoNF	:= 0
@@ -785,10 +790,11 @@ oReport:Section(2):Section(1):Cell("NVALIPI"):SetBlock({|| nValIPI})
 oReport:Section(2):Section(1):Cell("NVALFRE"):SetBlock({|| nValFRE})
 oReport:Section(2):Section(1):Cell("NVALDES"):SetBlock({|| nValDES})
 oReport:Section(2):Section(1):Cell("NVALICM"):SetBlock({|| nValIcm})
+oReport:Section(2):Section(1):Cell("NVALST"):SetBlock({|| nValST})
 oReport:Section(2):Section(1):Cell("NVALISS"):SetBlock({|| nVlrISS})
 oReport:Section(2):Section(1):Cell("NDESACES"):SetBlock({|| nAcN3})
-oReport:Section(2):Section(1):Cell("NACN6"):SetBlock({|| IIf((cAliasQry)->D2_TIPO $ "P", xMoeda((cAliasQry)->D2_VALIPI, 1, MV_PAR13, (cAliasQry)->D2_EMISSAO), xMoeda((cAliasQry)->D2_TOTAL + (cAliasQry)->D2_VALIPI + nTotRetIt, 1, MV_PAR13, (cAliasQry)->D2_EMISSAO, nTamD2_TOTAL))})     
-        
+//oReport:Section(2):Section(1):Cell("NACN6"):SetBlock({|| IIf((cAliasQry)->D2_TIPO $ "P", xMoeda((cAliasQry)->D2_VALIPI, 1, MV_PAR13, (cAliasQry)->D2_EMISSAO), xMoeda((cAliasQry)->D2_TOTAL + (cAliasQry)->D2_VALIPI + nTotRetIt, 1, MV_PAR13, (cAliasQry)->D2_EMISSAO, nTamD2_TOTAL))})     
+oReport:Section(2):Section(1):Cell("NACN6"):SetBlock({|| IIf((cAliasQry)->D2_TIPO $ "P", (cAliasQry)->D2_VALIPI, (cAliasQry)->D2_TOTAL + (cAliasQry)->D2_VALIPI + D2_VALFRE + nTotRetIt + (cAliasQry)->D2_DESPESA)})  //nTotRetIt ICMS-ST       
 
 oReport:Section(3):Cell("CNOTA")
 oReport:Section(3):Cell("CCOD")
@@ -1048,6 +1054,7 @@ While !oReport:Cancel() .And. !(cAliasQry)->(Eof())
 			nValFre := (cAliasQry)->D2_VALFRE
 			nValDes := (cAliasQry)->D2_DESPESA
 			nValIcm	:= IIf((cAliasQry)->F4_ICM == "S", xMoeda((cAliasQry)->D2_VALICM, 1, MV_PAR13, (cAliasQry)->D2_EMISSAO), 0)
+			nValST  := (cAliasQry)->D2_ICMSRET
 			nVlrISS	:= IIf((cAliasQry)->F4_ISS == "S", xMoeda((cAliasQry)->D2_VALISS, 1, MV_PAR13, dEmiDia),                 0)						
 			
 			If lRet .And. lFirst
