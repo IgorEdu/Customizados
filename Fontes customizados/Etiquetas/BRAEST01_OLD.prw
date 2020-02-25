@@ -21,26 +21,20 @@ Private oSay1
 Private oDlg
 Private oGet1
 Private oGet2
-Private cNumSer := Space(19)
+Private cNumSer := Space(18)
 Private _cDesc  := ""
 Private nList   := 1
 Private oList
 Private aFields := {}
-Private aFields2 := {}
 Private aStruct := {}
-Private aStruct2 := {}
 Private aCores 	:= {}
 Private oMark    
-Private oMark2	//igor
 Private cMark   := GetMark()
 Private lInvert := .F.
-Private cAlias  := "TAP"
-Private cAlias2  := "SC2" 
+Private cAlias  := "TAP" 
 Private nQtT    := 0
 Private nQtL    := 0
 Private nQtAp   := 0
-Private nRadio		:= 1
-Private aItensR		:= {'Leitura Normal', 'Leitura Cancelamento'}
 
 // Executa funcao de montagem da estruura
 //Aadd(aStruct, {"OK","C", 02 ,00, "Ok" })
@@ -48,7 +42,6 @@ Private aItensR		:= {'Leitura Normal', 'Leitura Cancelamento'}
 //Define as cores dos itens de legenda.
 aCores := {}
 aAdd(aCores,{"TAP->Z02_STATUS == 'L'","BR_VERDE"  })
-aAdd(aCores,{"TAP->Z02_STATUS == 'C' ","BR_MARROM"})
 aAdd(aCores,{"TAP->Z02_STATUS == ' ' ","BR_AMARELO"})
 aAdd(aCores,{"TAP->Z02_STATUS == 'P'","BR_VERMELHO"})
 
@@ -63,141 +56,70 @@ While !Eof() .And. SX3->X3_ARQUIVO == "Z02"
    Endif          
    SX3->(DbSkip())     
 End
-/*
-While !Eof() .And. SX3->X3_ARQUIVO == "SC2"
-   If AllTrim(SX3->X3_CAMPO) $ "C2_NUM/C2_PRODUTO/C2_QUANT/C2_EMISSAO/C2_QUJE"
-      Aadd(aStruct2, {SX3->X3_CAMPO,  SX3->X3_TIPO, SX3->X3_TAMANHO, SX3->X3_DECIMAL, AllTrim(SX3->X3_TITULO)})
-      Aadd(aFields2, {SX3->X3_CAMPO,, AllTrim(X3Titulo()), SX3->X3_PICTURE})
-   Endif          
-   SX3->(DbSkip())     
-End*/
 
 
 */
-Define MSDialog oDlg Title "APONTAMENTO DE PRODUÇÃO" From 000, 000  To 500, 1500 COLORS 0, 16777215 PIXEL
+Define MSDialog oDlg Title "APONTAMENTO DE PRODUÇÃO" From 000, 000  To 500, 1000 COLORS 0, 16777215 PIXEL
    Aadd( aButtons, {"HISTORIC", {|| Vld_Aprov()}, "Apontamento Prod...", "Apontamento" , {|| .T.}} )  
 //    @ 000, 000 SAY oSay1 SIZE 250, 250 OF oDlg COLORS 0, 16777215 PIXEL
    @ 038, 020 SAY "Codigo" OF oDlg     SIZE 076, 010 COLORS 0, 16777215 PIXEL
    @ 045, 020 MSGET oGet1  VAR cNumSer SIZE 150, 012 OF oDlg COLORS 0, 16777215 PIXEL Valid LEtiq(cNumSer)
    //oGet1:bChange := {||LEtiq(cNumSer)}  
    @ 057, 020 MSGET oGet2 VAR _cDesc SIZE 150, 012         Of oDlg COLORS 0, 65280 PIXEL
-   @ 110, 020 Say "Total de Etiquetas....:"      + Str(nQtT,4)       Of oDlg Size 085, 010 COLORS 0, 16777215 PIXEL
-   @ 120, 020 Say "Etiq. Lidas................:" + Str(nQtL,4)       Of oDlg Size 085, 010 COLORS 0, 16777215 PIXEL   
-   @ 130, 020 Say "Etiq. não Lidas.........:"    + Str(nQtT-nQtL-nQtAp,4) Of oDlg Size 085, 010 COLORS 0, 16777215 PIXEL   
-   @ 140, 020 Say "Etiq. Apontadas.......:"      + Str(nQtAp,4)      Of oDlg Size 085, 010 COLORS 0, 16777215 PIXEL   
-   @ 150, 020 Say "Etiq. não Apontadas:"         + Str(nQtT-nQtAp,4) Of oDlg Size 085, 010 COLORS 0, 16777215 PIXEL  
-   oRadio := TRadMenu():New ( 90, 20,aItensR,,oDlg,,,,,,,,100,12,,,,.T.)
-   oRadio:bSetGet := {|u|Iif (PCount()==0,nRadio,nRadio:=u)}
+   @ 090, 020 Say "Total de Etiquetas....:"      + Str(nQtT,4)       Of oDlg Size 085, 010 COLORS 0, 16777215 PIXEL
+   @ 100, 020 Say "Etiq. Lidas................:" + Str(nQtL,4)       Of oDlg Size 085, 010 COLORS 0, 16777215 PIXEL   
+   @ 110, 020 Say "Etiq. não Lidas.........:"    + Str(nQtT-nQtL-nQtAp,4) Of oDlg Size 085, 010 COLORS 0, 16777215 PIXEL   
+   @ 120, 020 Say "Etiq. Apontadas.......:"      + Str(nQtAp,4)      Of oDlg Size 085, 010 COLORS 0, 16777215 PIXEL   
+   @ 130, 020 Say "Etiq. não Apontadas:"         + Str(nQtT-nQtAp,4) Of oDlg Size 085, 010 COLORS 0, 16777215 PIXEL  
    AtuTmp(cNumSer)
-   oMark := MsSelect():New(cAlias,,"",aFields,@lInvert,@cMark,{040, 180, 220, 450},,, oDlg,, aCores)
-   //oMark2 := MsSelect():New(cAlias2,,"",,@lInvert,@cMark,{040, 510, 220, 650},,, oDlg,, aCores)
-   oMark2 := MsSelBr():New(040,460,200, 200,,,,oDlg,,,,,{||_cOP:=SC2->C2_NUM, U_clickop(_cOP)},,,,,,,.F.,cAlias2,.T.,,.F.,,, )
+   oMark := MsSelect():New(cAlias,,"",aFields,@lInvert,@cMark,{040, 180, 220, 500},,, oDlg,, aCores)
    
-	oMark2:AddColumn(TCColumn():New('Num OP' ,{||SC2->C2_NUM},,,,'LEFT',,.F.,.F.,,,,.F.,))
-	oMark2:AddColumn(TCColumn():New('Produto' ,{||SC2->C2_PRODUTO},,,,'LEFT',,.F.,.F.,,,,.F.,))
-	oMark2:AddColumn(TCColumn():New('Quantidade' ,{||SC2->C2_QUANT},,,,'LEFT',,.F.,.F.,,,,.F.,))
-	oMark2:AddColumn(TCColumn():New('Apontados' ,{||SC2->C2_QUJE},,,,'LEFT',,.F.,.F.,,,,.F.,))
-	oMark2:AddColumn(TCColumn():New('Data Emissão' ,{||SC2->C2_EMISSAO},,,,'LEFT',,.F.,.F.,,,,.F.,))
    
 Activate MSDialog oDlg ON INIT (EnchoiceBar(oDlg,{||lOk:=.T., oDlg:End()},{||oDlg:End()},,@aButtons,,,.F.,.T.,.F.,.T.,.F.))
 Return(Nil)
 
 Static Function LEtiq(cNumSer)
+DbSelectArea("Z02")
+Z02->(DbSetOrder(2))
+If !dbSeek(xFilial("Z02") + cNumSer) .And. !Empty(cNumSer)
+   MsgAlert("Etiqueta não Encontrada!...")
+   oGet1:Refresh() 
+   oGet1:SetFocus()
+   Return  
+  Elseif Empty(Alltrim(cNumSer))	
+   _cDesc := ""
+   oGet1:Refresh() 
+   oGet1:SetFocus()
+   Return
+  Elseif Z02->Z02_STATUS == "L"
+   MsgAlert("Etiqueta já Lida!...")
+   cCod   := Posicione("SC2",1,xFILIAL("SC2")+Z02->Z02_OP,"C2_PRODUTO")	
+   _cDesc := cNumSer + " - " + Posicione("SB1",1,xFILIAL("SB1")+cCod,"B1_DESC")
+   AtuTmp(cNumSer)
+   oGet1:Refresh() 
+   oGet1:SetFocus()
+   Return 
+  Elseif Z02->Z02_STATUS == "P"
+   MsgAlert("Produção já Apontada!...")
+   cCod   := Posicione("SC2",1,xFILIAL("SC2")+Z02->Z02_OP,"C2_PRODUTO")	
+   _cDesc := cNumSer + " - " + Posicione("SB1",1,xFILIAL("SB1")+cCod,"B1_DESC")
+   AtuTmp(cNumSer)
+   oGet1:Refresh() 
+   oGet1:SetFocus()
+   Return     
+Endif
 
-If nRadio = 1
-	DbSelectArea("Z02")
-	Z02->(DbSetOrder(2))
-	If !dbSeek(xFilial("Z02") + cNumSer) .And. !Empty(cNumSer)
-		MsgAlert("Etiqueta não Encontrada!...")
-		oGet1:Refresh() 
-		oGet1:SetFocus()
-	Return  
-	Elseif Empty(Alltrim(cNumSer))	
-		_cDesc := ""
-		oGet1:Refresh() 
-		oGet1:SetFocus()
-	Return
-	Elseif Z02->Z02_STATUS == "L"
-		MsgAlert("Etiqueta já Lida!...")
-		cCod   := Posicione("SC2",1,xFILIAL("SC2")+Z02->Z02_OP,"C2_PRODUTO")	
-		_cDesc := cNumSer + " - " + Posicione("SB1",1,xFILIAL("SB1")+cCod,"B1_DESC")
-		AtuTmp(cNumSer)
-		oGet1:Refresh() 
-		oGet1:SetFocus()
-	Return 
-	Elseif Z02->Z02_STATUS == "P"
-		MsgAlert("Produção já Apontada!...")
-		cCod   := Posicione("SC2",1,xFILIAL("SC2")+Z02->Z02_OP,"C2_PRODUTO")	
-		_cDesc := cNumSer + " - " + Posicione("SB1",1,xFILIAL("SB1")+cCod,"B1_DESC")
-		AtuTmp(cNumSer)
-		oGet1:Refresh() 
-		oGet1:SetFocus()
-	Return     
-	Endif
+RecLock("Z02",.F.) 
+  Z02->Z02_STATUS := "L"
+  Z02->Z02_HORA   := Time()
+  Z02->Z02_DATA   := DdataBase
+MsUnlock()
 
-	RecLock("Z02",.F.) 
-		Z02->Z02_STATUS := "L"
-		Z02->Z02_HORA   := Time()
-		Z02->Z02_DATA   := DdataBase
-	MsUnlock()
-
-	cCod   := Posicione("SC2",1,xFILIAL("SC2")+Z02->Z02_OP,"C2_PRODUTO")	
-	_cDesc := cNumSer + " - " + Posicione("SB1",1,xFILIAL("SB1")+cCod,"B1_DESC")
-	AtuTmp(cNumSer)
-	oGet1:Refresh() 
-	oGet1:SetFocus()
-
-Else
-	DbSelectArea("Z02")
-	Z02->(DbSetOrder(2))
-	If !dbSeek(xFilial("Z02") + cNumSer) .And. !Empty(cNumSer)
-		MsgAlert("Etiqueta não Encontrada!...")
-		oGet1:Refresh() 
-		oGet1:SetFocus()
-	Return  
-	Elseif Empty(Alltrim(cNumSer))	
-		_cDesc := ""
-		oGet1:Refresh() 
-		oGet1:SetFocus()
-	Return
-	Elseif Z02->Z02_STATUS == "C"
-		MsgAlert("Etiqueta já Cancelada!...")
-		cCod   := Posicione("SC2",1,xFILIAL("SC2")+Z02->Z02_OP,"C2_PRODUTO")	
-		_cDesc := cNumSer + " - " + Posicione("SB1",1,xFILIAL("SB1")+cCod,"B1_DESC")
-		AtuTmp(cNumSer)
-		oGet1:Refresh() 
-		oGet1:SetFocus()
-	Return 
-	Elseif Z02->Z02_STATUS == ""
-		MsgAlert("Etiqueta não lida!...")
-		cCod   := Posicione("SC2",1,xFILIAL("SC2")+Z02->Z02_OP,"C2_PRODUTO")	
-		_cDesc := cNumSer + " - " + Posicione("SB1",1,xFILIAL("SB1")+cCod,"B1_DESC")
-		AtuTmp(cNumSer)
-		oGet1:Refresh() 
-		oGet1:SetFocus()
-	Return 
-	Elseif Z02->Z02_STATUS == ""
-		MsgAlert("Produção já Apontada!...")
-		cCod   := Posicione("SC2",1,xFILIAL("SC2")+Z02->Z02_OP,"C2_PRODUTO")	
-		_cDesc := cNumSer + " - " + Posicione("SB1",1,xFILIAL("SB1")+cCod,"B1_DESC")
-		AtuTmp(cNumSer)
-		oGet1:Refresh() 
-		oGet1:SetFocus()
-	Return     
-	Endif
-
-	RecLock("Z02",.F.) 
-		Z02->Z02_STATUS := "C"
-		Z02->Z02_HORA   := Time()
-		Z02->Z02_DATA   := DdataBase
-	MsUnlock()
-
-	cCod   := Posicione("SC2",1,xFILIAL("SC2")+Z02->Z02_OP,"C2_PRODUTO")	
-	_cDesc := cNumSer + " - " + Posicione("SB1",1,xFILIAL("SB1")+cCod,"B1_DESC")
-	AtuTmp(cNumSer)
-	oGet1:Refresh() 
-	oGet1:SetFocus()
-EndIf
+cCod   := Posicione("SC2",1,xFILIAL("SC2")+Z02->Z02_OP,"C2_PRODUTO")	
+_cDesc := cNumSer + " - " + Posicione("SB1",1,xFILIAL("SB1")+cCod,"B1_DESC")
+AtuTmp(cNumSer)
+oGet1:Refresh() 
+oGet1:SetFocus()
 
 Return()
 
@@ -263,24 +185,6 @@ oGet1:Refresh()
 DBSelectArea("TAP")
 DbSeek(_cOP + _cSeq)
 oMark:oBrowse:Refresh()
-
-/*
-//Montando consulta de dados
-	cQryAux := ""
-	cQryAux += "SELECT C2.C2_NUM, "							+ STR_PULA
-	cQryAux += "C2.C2_PRODUTO , C2.C2_QUANT ,"		+ STR_PULA
-	cQryAux += "C2.C2_QUJE ,C2.C2_EMISSAO "			+ STR_PULA
-	cQryAux += "FROM SC2010 C2"									+ STR_PULA
-	cQryAux += "WHERE C2.C2_QUJE <> C2.C2_QUANT" 				+ STR_PULA
-	cQryAux += "ORDER BY C2.C2_EMISSAO"							+ STR_PULA
-	
-	cQryAux := ChangeQuery(cQryAux)
-	
-	
-	//Executando consulta e setando o total da régua
-	TCQuery cQryAux New Alias "QRY"
-*/
-	//oMark2:oBrowse:Refresh()
 
 Return()
 
@@ -380,27 +284,3 @@ Begin Transaction
   EndIf
 End Transaction	
 Return
-
-
-
-//---------------------------------------------------------------------------------------
-
-User Function clickop(_cOP)
-
-DbSelectArea("Z02")
-Z02->(DbSetOrder(1))
-	
-If !DbSeek(xFilial("Z02") + _cOP) .And. !Empty(_cOP)
-   MsgAlert("Etiqueta não Encontrada!...")
-   Return  
-Elseif Empty(_cOP)  
-	Return 
-Endif
-
-_cOP     := Z02->Z02_OP
-_cItem   := Z02->Z02_ITEM
-_cC2Seq  := Z02->Z02_C2SEQ
-_cStatus := Z02->Z02_STATUS
-cNumSer	 := Z02->Z02_SEQUEN
-
-AtuTmp(cNumSer)
